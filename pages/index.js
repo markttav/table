@@ -1,65 +1,202 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import {
+  Table,
+  Col,
+  Row,
+  Typography,
+  AutoComplete,
+  Button,
+  Select,
+} from "antd";
+import "antd/dist/antd.css";
+import React, { useState, useEffect } from "react";
+import "../components/api/api";
+import { update } from "../components/api/api";
+import styles from "../styles/index.module.css";
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+const columns = [
+  {
+    title: "№",
+    dataIndex: "number",
+    defaultSortOrder: "ascend",
+    sorter: (a, b) => a.number - b.number,
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+  },
+  {
+    title: "Age",
+    dataIndex: "age",
+  },
+  {
+    title: "City",
+    dataIndex: "city",
+  },
+  {
+    title: "Adress",
+    dataIndex: "adress",
+  },
+  {
+    title: "Pet",
+    dataIndex: "pet",
+  },
+];
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+class App extends React.Component {
+  state = {
+    data: null,
+    loading: false,
+    pagination: {
+      current: 1,
+      pageSize: 5,
+    },
+    filtered: null,
+    nameInputValue: "",
+    numberInputValue: "",
+    ageInputValue: "",
+  };
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+  reset = () => {
+    this.setState({
+      filtered: this.state.data,
+      nameInputValue: "",
+      numberInputValue: "",
+      ageInputValue: "",
+    });
+  };
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+  fetchFunc = (pagination = {}) => {
+    this.setState({ loading: true });
+    update({ url: "http://localhost:3000/data" }).then((response) => {
+      this.setState({
+        loading: false,
+        data: response,
+        pagination: {
+          ...pagination,
+        },
+        filtered: response,
+      });
+    });
+  };
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+  componentDidMount = () => {
+    const { pagination } = this.state;
+    this.fetchFunc({ pagination });
+  };
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+  handlerSelect = (age) => {
+    switch (age) {
+      case "30": {
+        return this.setState({
+          filtered: this.state.data.filter((person) => person.age <= 30),
+          ageInputValue: age,
+          nameInputValue: "",
+          numberInputValue: "",
+        });
+      }
+      case "30-45": {
+        return this.setState({
+          filtered: this.state.data.filter((person) => 30 < person.age <= 45),
+          ageInputValue: age,
+          nameInputValue: "",
+          numberInputValue: "",
+        });
+      }
+      case "45": {
+        return this.setState({
+          filtered: this.state.data.filter((person) => person.age > 45),
+          ageInputValue: age,
+          nameInputValue: "",
+          numberInputValue: "",
+        });
+      }
+    }
+  };
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+  render() {
+    const { Title } = Typography;
+
+    return (
+      <>
+        <div className={styles.App}>
+          <div>
+            <Table
+              bordered={true}
+              className={styles.antTable}
+              columns={columns}
+              dataSource={this.state.filtered}
+              loading={this.state.loading}
+            />
+          </div>
+
+          {this.state.data && (
+            <div className={styles.filter}>
+              <Title level={4}>FILTER</Title>
+              <Row className={styles.filters}>
+                <Typography>Name</Typography>
+                <AutoComplete
+                  placeholder={"Pick person's name"}
+                  value={this.state.nameInputValue}
+                  dataSource={this.state.data.map((person) => person.name)}
+                  onChange={(nameSearch) =>
+                    this.setState({
+                      filtered: this.state.data.filter((person) =>
+                        person.name.includes(nameSearch)
+                      ),
+                      nameInputValue: nameSearch,
+                      ageInputValue: "",
+                      numberInputValue: "",
+                    })
+                  }
+                />
+              </Row>
+
+              <Row className={styles.filters}>
+                <Typography>Number</Typography>
+                <AutoComplete
+                  placeholder={"Pick person's number"}
+                  value={this.state.numberInputValue}
+                  dataSource={this.state.data.map((person) =>
+                    person.number.toString()
+                  )}
+                  onChange={(number) =>
+                    this.setState({
+                      filtered: this.state.data.filter(
+                        (person) => person.number == number
+                      ),
+                      numberInputValue: number,
+                      ageInputValue: "",
+                      nameInputValue: "",
+                    })
+                  }
+                />
+              </Row>
+
+              <Row className={styles.filters}>
+                <Typography>Age</Typography>
+                <Select
+                  value={this.state.ageInputValue}
+                  onChange={(e) => {
+                    this.handlerSelect(e);
+                  }}
+                >
+                  <Option value={"30"}> Up to 30 </Option>
+                  <Option value={"30-45"}> 30-45 </Option>
+                  <Option value={"45"}> 45-whatever </Option>
+                </Select>
+              </Row>
+              <Button
+                onClick={() => {
+                  this.reset();
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          )}
         </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+      </>
+    );
+  }
 }
+export default App;

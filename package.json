@@ -3,13 +3,22 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "nodemon server/index.js",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
+    "antd": "^4.12.3",
+    "body-parser": "^1.19.0",
+    "chance": "^1.1.7",
+    "express": "^4.17.1",
     "next": "10.0.6",
-    "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "reactdom": "^2.0.0",
+    "shuffle-array": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }

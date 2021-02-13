@@ -1,0 +1,24 @@
+.App {
+  display: flex;
+}
+.antTable {
+  width: 80vw;
+  padding: 1em 0 0 1em;
+}
+
+.filter {
+  background-color: #f5f7ff;
+  width: 19vw;
+  margin-top: 1.5vh;
+  margin-left: 1vw;
+  padding-left: 1em;
+  height: 98.5vh;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 200px;
+  margin-bottom: 20px;
+}
